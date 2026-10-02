@@ -10,7 +10,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "relay — không gian phát riêng",
-  description: "Trình phát YouTube cá nhân. Giao diện và luồng media cùng đi qua server của bạn.",
+  description: "Trình phát YouTube cá nhân. Luồng media đi qua backend riêng của bạn.",
   robots: { index: false, follow: false },
 };
 export const viewport: Viewport = { themeColor: "#171816", colorScheme: "dark" };

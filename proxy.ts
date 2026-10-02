@@ -1,15 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
+import { normalizeApiOrigin } from "@/lib/api-origin";
 
 export function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const dev = process.env.NODE_ENV !== "production";
+  let apiOrigin = "";
+  if (process.env.RELAY_MODE === "cloudflare") {
+    try { apiOrigin = normalizeApiOrigin(process.env.NEXT_PUBLIC_API_ORIGIN || ""); } catch { /* Fail closed: no external connect-src. */ }
+  }
   const csp = [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${dev ? " 'unsafe-eval'" : ""}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob:",
     "font-src 'self'",
-    `connect-src 'self' blob:${dev ? " ws: wss:" : ""}`,
+    `connect-src 'self' blob:${apiOrigin ? ` ${apiOrigin}` : ""}${dev ? " ws: wss:" : ""}`,
     "media-src 'self' blob:",
     "object-src 'none'",
     "base-uri 'self'",

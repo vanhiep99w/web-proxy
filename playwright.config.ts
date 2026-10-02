@@ -2,6 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./e2e",
+  testIgnore: "cloudflare.spec.ts",
   fullyParallel: true,
   use: { baseURL: "http://127.0.0.1:3100", trace: "retain-on-failure", reducedMotion: "reduce" },
   projects: [
@@ -13,6 +14,8 @@ export default defineConfig({
     url: "http://127.0.0.1:3100",
     reuseExistingServer: !process.env.CI,
     env: {
+      RELAY_MODE: "standalone",
+      RELAY_DEV_DIST_DIR: ".next/e2e-standalone",
       ACCESS_PASSWORD: "abc",
       AUTH_SECRET: "e2e-private-secret-at-least-32-characters-not-for-deployment",
     },

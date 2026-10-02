@@ -77,6 +77,20 @@ export function sessionFromRequest(request: Request): Session | null {
   return parseSession(raw?.slice(COOKIE_NAME.length + 1));
 }
 
+export function bearerSessionFromRequest(request: Request): Session | null {
+  const authorization = request.headers.get("authorization") || "";
+  const token = authorization.match(/^Bearer ([A-Za-z0-9_-]{40,16384})$/)?.[1];
+  // Worker endpoints never fall back to cookies or URL parameters.
+  return parseSession(token);
+}
+
+export function requireBearerSession(request: Request): Session {
+  requireConfiguration();
+  const session = bearerSessionFromRequest(request);
+  if (!session) throw new AppError("AUTH_REQUIRED", "Phiên đã hết hạn. Hãy mở khóa lại.", 401);
+  return session;
+}
+
 export function requireSession(request: Request): Session {
   requireConfiguration();
   const session = sessionFromRequest(request);

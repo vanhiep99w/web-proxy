@@ -3,10 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "A private, same-origin YouTube player for Vercel. Experimental upstream support.",
+  "description": "A private YouTube player with a Vercel frontend and Cloudflare Workers API. Experimental upstream support.",
   "scripts": {
     "setup": "node scripts/setup.mjs",
+    "setup:home": "node scripts/setup-home.mjs",
     "dev": "next dev",
+    "dev:home": "node scripts/run-role.mjs home dev",
+    "dev:frontend": "node scripts/run-role.mjs frontend dev",
+    "start:home": "node scripts/run-role.mjs home start",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
@@ -14,17 +18,26 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "check": "npm run lint && npm run typecheck && npm test && npm run build"
+    "test:home": "playwright test --config=playwright.home.config.ts",
+    "test:cloudflare": "playwright test --config=playwright.cloudflare.config.ts",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build && npm run build:worker",
+    "dev:cloudflare": "node scripts/run-role.mjs cloudflare dev",
+    "dev:worker": "wrangler dev --ip 127.0.0.1 --port 8787",
+    "build:worker": "wrangler deploy --dry-run --outdir .wrangler/build",
+    "deploy:worker": "wrangler deploy",
+    "test:worker": "vitest run tests/cloudflare-runtime.test.ts"
   },
   "engines": {
     "node": "24.x"
   },
   "dependencies": {
     "@fontsource/be-vietnam-pro": "^5.3.0",
+    "@jitl/quickjs-wasmfile-release-sync": "^0.32.0",
     "dashjs": "^5.2.1",
     "lucide-react": "^1.49.0",
     "next": "^16.3.8",
     "quickjs-emscripten": "^0.32.0",
+    "quickjs-emscripten-core": "^0.32.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "youtubei.js": "^18.1.0"
@@ -37,7 +50,9 @@
     "@types/react-dom": "^19.3.0",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.8",
+    "miniflare": "^5.20261001.0-alpha",
     "typescript": "^5.9.3",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.3",
+    "wrangler": "^4.146.0"
   }
 }

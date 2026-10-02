@@ -12,7 +12,7 @@ export function assertSameOrigin(request: Request) {
   }
 }
 
-export async function readJson(request: Request, maxBytes = 4096): Promise<Record<string, unknown>> {
+export async function readJson(request: Request | Response, maxBytes = 4096): Promise<Record<string, unknown>> {
   if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) {
     throw new AppError("INVALID_BODY", "Yêu cầu cần có định dạng JSON.", 415);
   }

@@ -1,4 +1,5 @@
-import { requireSession } from "@/lib/auth";
+import { apiSession, relayMode } from "@/lib/relay-mode";
+import { forwardHome } from "@/lib/home-proxy";
 import { AppError, errorResponse } from "@/lib/errors";
 import { boundedMediaBody, fetchMediaRange, readMediaTicket } from "@/lib/media";
 import { parseRange } from "@/lib/range";
@@ -11,8 +12,9 @@ export const maxDuration = 60;
 async function serve(request: Request, head: boolean) {
   let total: number | undefined;
   try {
-    const session = requireSession(request);
+    const session = apiSession(request);
     consumeRateLimit(`stream:${session.sid}`, 240, 60_000);
+    if (relayMode() === "frontend") return await forwardHome(request, "stream", session);
     const url = new URL(request.url);
     const ticket = url.searchParams.get("ticket");
     if (!ticket) throw new AppError("INVALID_TOKEN", "Thiếu quyền truy cập luồng.", 403);

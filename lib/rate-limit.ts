@@ -20,7 +20,8 @@ export function consumeRateLimit(key: string, limit: number, windowMs: number, n
 }
 
 export function loginBucket(request: Request) {
-  // Only Vercel's platform-owned header is used in production; do not trust an arbitrary X-Forwarded-For.
-  const ip = process.env.VERCEL ? request.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() : "local";
+  // Only platform-owned headers are trusted; never an arbitrary X-Forwarded-For.
+  const ip = process.env.RELAY_MODE === "worker" ? request.headers.get("cf-connecting-ip") :
+    process.env.VERCEL ? request.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() : "local";
   return `login:${createHash("sha256").update(ip || "unknown").digest("hex")}`;
 }

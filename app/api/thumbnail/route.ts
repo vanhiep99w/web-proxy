@@ -1,4 +1,5 @@
-import { requireSession } from "@/lib/auth";
+import { apiSession, relayMode } from "@/lib/relay-mode";
+import { forwardHome } from "@/lib/home-proxy";
 import { AppError, errorResponse } from "@/lib/errors";
 import { boundedMediaBody } from "@/lib/media";
 import { consumeRateLimit } from "@/lib/rate-limit";
@@ -10,13 +11,15 @@ export const maxDuration = 15;
 
 export async function GET(request: Request) {
   try {
-    const session = requireSession(request);
+    const session = apiSession(request);
     consumeRateLimit(`thumb:${session.sid}`, 90, 60_000);
+    if (relayMode() === "frontend") return await forwardHome(request, "thumbnail", session);
     const id = new URL(request.url).searchParams.get("id");
     if (!id || !VIDEO_ID.test(id)) throw new AppError("INVALID_VIDEO_URL", "Mã video không hợp lệ.");
     // A fixed origin and a validated ID; no user-supplied image URL is fetched.
     const response = await fetch(`https://i.ytimg.com/vi/${id}/hqdefault.jpg`, {
-      cache: "no-store", redirect: "error",
+      // Workers supports manual/follow, not redirect:error. Reject 3xx below.
+      cache: "no-store", redirect: "manual",
       signal: AbortSignal.any([request.signal, AbortSignal.timeout(8000)]),
     });
     if (!response.ok || !response.body) throw new AppError("THUMBNAIL_UNAVAILABLE", "Không lấy được ảnh video.", 502);

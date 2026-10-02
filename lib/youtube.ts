@@ -47,7 +47,7 @@ export async function resolveVideo(id: string, mode: PlaybackMode, quality: Vide
     // This client's public VOD formats can still expose byte-range MP4 URLs.
     info = await client.getBasicInfo(id, { client: "IOS" });
   } catch {
-    throw new AppError("YOUTUBE_UNREACHABLE", "Không lấy được thông tin từ YouTube. IP Vercel có thể bị chặn; hãy thử lại sau.", 502);
+    throw new AppError("YOUTUBE_UNREACHABLE", "Không lấy được thông tin từ YouTube. Kiểm tra kết nối và IP của máy xử lý media.", 502);
   }
   const status = info.playability_status?.status;
   if (status !== "OK") {
@@ -77,7 +77,7 @@ export async function resolveVideo(id: string, mode: PlaybackMode, quality: Vide
     if (!videoByHeight.has(format.height!)) videoByHeight.set(format.height!, format);
   }
   if (!audio || (mode === "video" && !videoByHeight.size)) {
-    throw new AppError("NO_COMPATIBLE_STREAM", "YouTube không cung cấp luồng MP4 phù hợp. Thử chế độ chỉ nghe; nếu vẫn lỗi thì Vercel-only chưa hỗ trợ video này.", 422);
+    throw new AppError("NO_COMPATIBLE_STREAM", "YouTube không cung cấp luồng MP4 phù hợp. Thử chế độ chỉ nghe; nếu vẫn lỗi thì backend chưa hỗ trợ video này.", 422);
   }
   const selected = [audio, ...videoByHeight.values()];
   const urls = new Map<number, string>();

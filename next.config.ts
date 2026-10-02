@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const config: NextConfig = {
   poweredByHeader: false,
   devIndicators: false,
+  // Isolate concurrent frontend/home/test dev servers. Production uses .next.
+  distDir: process.env.RELAY_DEV_DIST_DIR || ".next",
   serverExternalPackages: ["youtubei.js", "quickjs-emscripten"],
   // Keep QuickJS's dynamically loaded WASM in Vercel's function bundle.
   outputFileTracingIncludes: {

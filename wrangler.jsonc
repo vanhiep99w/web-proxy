@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "relay-private-api",
+  "main": "cloudflare/index.ts",
+  "compatibility_date": "2026-06-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "tsconfig": "tsconfig.json",
+  "alias": {
+    "@/lib/evaluator": "./cloudflare/evaluator.ts",
+    "youtubei.js": "youtubei.js/cf-worker"
+  },
+  "vars": {
+    "RELAY_MODE": "worker",
+    // Replace with your real Vercel/custom frontend origin before deployment.
+    "FRONTEND_ORIGINS": "http://localhost:3000,http://127.0.0.1:3000"
+  },
+  // Choose a namespace unique to this application in your Cloudflare account.
+  "ratelimits": [{
+    "name": "LOGIN_RATE_LIMITER",
+    "namespace_id": "1001",
+    "simple": { "limit": 8, "period": 60 }
+  }],
+  "observability": { "enabled": false }
+}

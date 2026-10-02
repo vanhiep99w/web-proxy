@@ -8,6 +8,7 @@ import { mintMediaTicket } from "@/lib/media";
 vi.mock("@/lib/youtube", () => ({ resolveVideo: vi.fn() }));
 
 beforeEach(() => {
+  vi.stubEnv("RELAY_MODE", "standalone");
   vi.stubEnv("ACCESS_PASSWORD", "random-password-at-least-16");
   vi.stubEnv("AUTH_SECRET", "random-secret-at-least-32-characters-for-testing");
 });

@@ -64,7 +64,7 @@ export async function fetchMediaRange(value: string, range: ByteRange, total: nu
       if (!response.ok) {
         await response.body?.cancel();
         if (response.status === 403 || response.status === 429) {
-          throw new AppError("UPSTREAM_BLOCKED", "YouTube từ chối luồng từ IP server. Vercel-only có thể không phát được video này.", 502);
+          throw new AppError("UPSTREAM_BLOCKED", "YouTube từ chối luồng từ IP máy xử lý media. Kiểm tra mạng của backend đang sử dụng.", 502);
         }
         if (response.status === 404 || response.status === 410) {
           throw new AppError("STREAM_EXPIRED", "Luồng không còn khả dụng. Hãy lấy lại luồng.", 410);

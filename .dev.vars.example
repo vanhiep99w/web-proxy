@@ -1,0 +1,4 @@
+# Only for local wrangler dev. Never commit .dev.vars.
+# Production secrets: npx wrangler secret put ACCESS_PASSWORD / AUTH_SECRET.
+ACCESS_PASSWORD=
+AUTH_SECRET=
