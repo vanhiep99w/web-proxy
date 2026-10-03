@@ -1,24 +1,43 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import { requireBearerSession, requireConfiguration, requireSession, SESSION_SECONDS, type Session } from "@/lib/auth";
-import { assertWorkerOrigin } from "@/lib/worker-cors";
+import { normalizeApiOrigin } from "@/lib/api-origin";
+import { assertDirectOrigin } from "@/lib/worker-cors";
 import { AppError } from "@/lib/errors";
 
-export type RelayMode = "standalone" | "frontend" | "home" | "cloudflare" | "worker";
+export type RelayMode = "standalone" | "frontend" | "home" | "cloudflare" | "worker" | "vps" | "server";
 
 export function relayMode(): RelayMode {
   const mode = process.env.RELAY_MODE || "standalone";
-  if (mode !== "standalone" && mode !== "frontend" && mode !== "home" && mode !== "cloudflare" && mode !== "worker") {
-    throw new AppError("INVALID_RELAY_MODE", "RELAY_MODE phải là standalone, frontend, home, cloudflare hoặc worker.", 503);
+  if (!["standalone", "frontend", "home", "cloudflare", "worker", "vps", "server"].includes(mode)) {
+    throw new AppError("INVALID_RELAY_MODE", "RELAY_MODE phải là standalone, frontend, home, cloudflare, worker, vps hoặc server.", 503);
   }
-  return mode;
+  return mode as RelayMode;
+}
+
+export function isDirectFrontendMode(mode = relayMode()) {
+  return mode === "cloudflare" || mode === "vps";
+}
+
+export function isDirectBackendMode(mode = relayMode()) {
+  return mode === "worker" || mode === "server";
 }
 
 export function requireBrowserMode() {
-  if (relayMode() === "cloudflare") {
-    throw new AppError("EXTERNAL_BACKEND", "Frontend này gọi API trực tiếp trên Cloudflare; API Vercel đã tắt.", 404);
+  const mode = relayMode();
+  if (isDirectFrontendMode(mode)) {
+    throw new AppError("EXTERNAL_BACKEND", "Frontend này gọi API trực tiếp trên backend riêng; API Vercel đã tắt.", 404);
   }
-  if (relayMode() === "home") {
+  if (mode === "home") {
     throw new AppError("HOME_ONLY", "Backend tại nhà chỉ nhận request có khóa riêng từ Vercel.", 404);
+  }
+}
+
+export function serverApiOrigin(): string {
+  if (relayMode() !== "server") throw new AppError("SERVER_WRONG_MODE", "Node backend cần RELAY_MODE=server.", 503);
+  try {
+    return normalizeApiOrigin(process.env.API_ORIGIN || "");
+  } catch {
+    throw new AppError("SERVER_NOT_CONFIGURED", "API_ORIGIN cần là origin HTTPS công khai của Oracle VPS, không kèm đường dẫn.", 503);
   }
 }
 
@@ -45,11 +64,13 @@ export function requireHomeKey(request: Request) {
 }
 
 export function apiSession(request: Request, now = Date.now()): Session {
-  if (relayMode() === "worker") {
-    assertWorkerOrigin(request);
+  const mode = relayMode();
+  if (isDirectBackendMode(mode)) {
+    assertDirectOrigin(request);
+    if (mode === "server") serverApiOrigin();
     return requireBearerSession(request);
   }
-  if (relayMode() !== "home") {
+  if (mode !== "home") {
     requireBrowserMode();
     return requireSession(request);
   }
@@ -68,8 +89,10 @@ export function apiSession(request: Request, now = Date.now()): Session {
 }
 
 export function playbackOrigin(request: Request): string {
-  if (relayMode() === "worker") return new URL(request.url).origin;
-  const value = relayMode() === "home" ? request.headers.get("x-relay-frontend-origin") : request.headers.get("origin");
+  const mode = relayMode();
+  if (mode === "worker") return new URL(request.url).origin;
+  if (mode === "server") return serverApiOrigin();
+  const value = mode === "home" ? request.headers.get("x-relay-frontend-origin") : request.headers.get("origin");
   try {
     const url = new URL(value || "");
     const loopback = ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);

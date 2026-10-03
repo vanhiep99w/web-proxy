@@ -1,0 +1,33 @@
+[Unit]
+Description=relay private API (Oracle VPS)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/relay-private-player
+Environment=NODE_ENV=production
+# Leaves memory for Ubuntu, Caddy and QuickJS on the 1 GB Always Free shape.
+Environment="NODE_OPTIONS=--max-old-space-size=640"
+ExecStart=/usr/bin/node scripts/run-role.mjs server start
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+KillSignal=SIGTERM
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=full
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target

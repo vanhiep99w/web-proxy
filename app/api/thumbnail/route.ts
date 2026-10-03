@@ -3,13 +3,14 @@ import { forwardHome } from "@/lib/home-proxy";
 import { AppError, errorResponse } from "@/lib/errors";
 import { boundedMediaBody } from "@/lib/media";
 import { consumeRateLimit } from "@/lib/rate-limit";
+import { serverPreflight, withServerCors } from "@/lib/server-cors";
 import { VIDEO_ID } from "@/lib/video-id";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 15;
 
-export async function GET(request: Request) {
+async function getThumbnail(request: Request) {
   try {
     const session = apiSession(request);
     consumeRateLimit(`thumb:${session.sid}`, 90, 60_000);
@@ -38,3 +39,6 @@ export async function GET(request: Request) {
     });
   } catch (error) { return errorResponse(error); }
 }
+
+export const GET = (request: Request) => withServerCors(request, () => getThumbnail(request));
+export const OPTIONS = (request: Request) => serverPreflight(request, ["GET"]);

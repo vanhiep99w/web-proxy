@@ -80,7 +80,7 @@ export function sessionFromRequest(request: Request): Session | null {
 export function bearerSessionFromRequest(request: Request): Session | null {
   const authorization = request.headers.get("authorization") || "";
   const token = authorization.match(/^Bearer ([A-Za-z0-9_-]{40,16384})$/)?.[1];
-  // Worker endpoints never fall back to cookies or URL parameters.
+  // Direct API backends never fall back to cookies or URL parameters.
   return parseSession(token);
 }
 

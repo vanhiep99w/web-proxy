@@ -4,6 +4,7 @@ import { AppError, errorResponse } from "@/lib/errors";
 import { boundedMediaBody, fetchMediaRange, readMediaTicket } from "@/lib/media";
 import { parseRange } from "@/lib/range";
 import { consumeRateLimit } from "@/lib/rate-limit";
+import { serverPreflight, withServerCors } from "@/lib/server-cors";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -44,5 +45,6 @@ async function serve(request: Request, head: boolean) {
   }
 }
 
-export const GET = (request: Request) => serve(request, false);
-export const HEAD = (request: Request) => serve(request, true);
+export const GET = (request: Request) => withServerCors(request, () => serve(request, false));
+export const HEAD = (request: Request) => withServerCors(request, () => serve(request, true));
+export const OPTIONS = (request: Request) => serverPreflight(request, ["GET", "HEAD"]);

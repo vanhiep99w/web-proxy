@@ -1,0 +1,23 @@
+# Replace api.example.com with the hostname whose A/AAAA record points to this VM.
+# Keep DNS-only mode if your DNS provider also offers an HTTP proxy/CDN.
+api.example.com {
+    header {
+        -Server
+        Strict-Transport-Security "max-age=31536000"
+        X-Content-Type-Options "nosniff"
+    }
+
+    route {
+        @relay_api path /api/*
+        handle @relay_api {
+            reverse_proxy 127.0.0.1:3001 {
+                # Send media ranges immediately instead of buffering them in the proxy.
+                flush_interval -1
+            }
+        }
+
+        handle {
+            respond "Not found" 404
+        }
+    }
+}

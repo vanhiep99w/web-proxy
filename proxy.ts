@@ -5,7 +5,7 @@ export function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const dev = process.env.NODE_ENV !== "production";
   let apiOrigin = "";
-  if (process.env.RELAY_MODE === "cloudflare") {
+  if (process.env.RELAY_MODE === "cloudflare" || process.env.RELAY_MODE === "vps") {
     try { apiOrigin = normalizeApiOrigin(process.env.NEXT_PUBLIC_API_ORIGIN || ""); } catch { /* Fail closed: no external connect-src. */ }
   }
   const csp = [

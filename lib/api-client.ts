@@ -65,7 +65,7 @@ export class ApiClient {
       const response = await this.request("/api/auth", { method: "DELETE", signal: AbortSignal.timeout(15000) });
       if (!response.ok) throw new Error("Logout failed");
     }
-    // Worker sessions are stateless; locking locally must work even offline.
+    // Direct-backend sessions are stateless; locking locally must work even offline.
     this.clearSession();
   }
 }

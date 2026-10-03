@@ -34,7 +34,13 @@ function Record({ loading = false }: { loading?: boolean }) {
   return <div className={`record ${loading ? "record-loading" : ""}`} aria-hidden="true"><span className="record-inner">{loading ? <LoaderCircle size={26} className="spin" /> : <Play size={24} strokeWidth={1.5} />}</span></div>;
 }
 
-export default function Workspace({ initialAuthenticated, configured, viaHome = false, viaCloudflare = false, apiOrigin = "" }: { initialAuthenticated: boolean; configured: boolean; viaHome?: boolean; viaCloudflare?: boolean; apiOrigin?: string }) {
+type DirectBackend = "cloudflare" | "vps";
+
+export default function Workspace({ initialAuthenticated, configured, viaHome = false, directBackend, apiOrigin = "" }: { initialAuthenticated: boolean; configured: boolean; viaHome?: boolean; directBackend?: DirectBackend; apiOrigin?: string }) {
+  const viaCloudflare = directBackend === "cloudflare";
+  const viaVps = directBackend === "vps";
+  const viaDirect = !!directBackend;
+  const backendName = viaCloudflare ? "Cloudflare" : viaVps ? "Oracle VPS" : "nhà";
   const [api] = useState(() => new ApiClient(apiOrigin));
   const [authenticated, setAuthenticated] = useState(initialAuthenticated);
   const [password, setPassword] = useState("");
@@ -159,8 +165,8 @@ export default function Workspace({ initialAuthenticated, configured, viaHome = 
     try {
       const response = await api.request("/api/backend", { signal: AbortSignal.timeout(15000), cache: "no-store" });
       const data = await response.json() as { connected?: boolean } | ApiErrorBody;
-      setToast(response.ok && "connected" in data && data.connected ? `Kết nối backend ${viaCloudflare ? "Cloudflare" : "nhà"} thành công. Khả năng phát còn phụ thuộc YouTube.` : "error" in data ? data.error.message : "Chưa kết nối được backend.");
-    } catch { setToast(viaCloudflare ? "Không kết nối được Cloudflare. Kiểm tra URL API và FRONTEND_ORIGINS." : "Không kết nối được backend nhà. Kiểm tra server và tunnel."); }
+      setToast(response.ok && "connected" in data && data.connected ? `Kết nối backend ${backendName} thành công. Khả năng phát còn phụ thuộc YouTube.` : "error" in data ? data.error.message : "Chưa kết nối được backend.");
+    } catch { setToast(viaDirect ? `Không kết nối được ${backendName}. Kiểm tra URL API, HTTPS và FRONTEND_ORIGINS.` : "Không kết nối được backend nhà. Kiểm tra server và tunnel."); }
     finally { setBackendBusy(false); }
   }
 
@@ -188,7 +194,7 @@ export default function Workspace({ initialAuthenticated, configured, viaHome = 
         <h1>Một nơi<br />để bấm <span>play.</span></h1>
         <p className="gate-description">Dán một link YouTube để xem hoặc chỉ nghe.<br className="desktop-break" /> Luồng media đi qua server của bạn.</p>
         <div className="gate-visual" aria-hidden="true"><Record /><span className="gate-visual-line" /><span className="gate-visual-caption">PRESS PLAY. MAKE SPACE.</span></div>
-        <div className="experimental-note"><Radio size={16} /><span>{viaCloudflare ? "Vercel FE / Cloudflare API." : "Bản thử nghiệm trên Vercel."}<br />Không đảm bảo phát được mọi video.</span></div>
+        <div className="experimental-note"><Radio size={16} /><span>{viaCloudflare ? "Vercel FE / Cloudflare API." : viaVps ? "Vercel FE / Oracle VPS API." : "Bản thử nghiệm trên Vercel."}<br />Không đảm bảo phát được mọi video.</span></div>
       </section>
       <section className="gate-panel" aria-labelledby="gate-title">
         <div className="panel-index"><span>01 / MỞ KHÓA</span><LockKeyhole size={18} /></div>
@@ -201,10 +207,10 @@ export default function Workspace({ initialAuthenticated, configured, viaHome = 
             <button type="button" className="icon-button" onClick={() => setVisiblePassword(!visiblePassword)} aria-label={visiblePassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"} aria-pressed={visiblePassword}>{visiblePassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
           </div>
           {authError && <p id="auth-error" className="field-error" role="alert">{authError}</p>}
-          {!configured && <div className="configuration-note" role="status">{viaCloudflare ? <>Đặt <code>NEXT_PUBLIC_API_ORIGIN</code> là origin HTTPS của Worker trên Vercel rồi redeploy. Mật khẩu và <code>AUTH_SECRET</code> chỉ đặt trên Cloudflare.</> : <>Kiểm tra cấu hình server: <code>ACCESS_PASSWORD</code> không được để trống và <code>AUTH_SECRET</code> cần ít nhất 32 ký tự. Sửa trong <code>.env.local</code> rồi khởi động lại server, hoặc đặt các biến trên Vercel.</>}</div>}
+          {!configured && <div className="configuration-note" role="status">{viaDirect ? <>Đặt <code>NEXT_PUBLIC_API_ORIGIN</code> là origin HTTPS của {viaCloudflare ? "Worker" : "Oracle VPS"} trên Vercel rồi redeploy. Mật khẩu và <code>AUTH_SECRET</code> chỉ đặt trên backend.</> : <>Kiểm tra cấu hình server: <code>ACCESS_PASSWORD</code> không được để trống và <code>AUTH_SECRET</code> cần ít nhất 32 ký tự. Sửa trong <code>.env.local</code> rồi khởi động lại server, hoặc đặt các biến trên Vercel.</>}</div>}
           <button className="primary-button unlock-button" disabled={!configured || authBusy}>{authBusy ? <><LoaderCircle size={17} className="spin" />Đang mở khóa</> : <>Mở khóa<ArrowRight size={18} /></>}</button>
         </form>
-        <div className="gate-security"><ShieldCheck size={16} /><span>{viaCloudflare ? "Tải lại trang cần mở khóa lại." : "Phiên có thời hạn 8 giờ."}<br />Mật khẩu không được lưu trên trình duyệt.</span></div>
+        <div className="gate-security"><ShieldCheck size={16} /><span>{viaDirect ? "Tải lại trang cần mở khóa lại." : "Phiên có thời hạn 8 giờ."}<br />Mật khẩu không được lưu trên trình duyệt.</span></div>
       </section>
     </main> : <div className="workspace-layout">
       <nav className="workspace-nav" aria-label="Điều hướng">
@@ -215,7 +221,7 @@ export default function Workspace({ initialAuthenticated, configured, viaHome = 
         <div className="nav-bottom"><ShieldCheck size={20} /><p>Lịch sử chỉ lưu<br />trên trình duyệt này.</p><span>PRIVATE / LOCAL HISTORY</span></div>
       </nav>
       <main id="main-content" className="workspace-body">
-        <div className="section-heading"><div><span className="eyebrow">BÀN PHÁT / 01</span><h1>Hôm nay, {mode === "audio" ? "nghe" : "xem"} gì?</h1></div><span className="edition-label">YOUTUBE<br /><span>{viaCloudflare ? "CLOUDFLARE API" : viaHome ? "HOME BACKEND" : "EXPERIMENTAL"}</span></span></div>
+        <div className="section-heading"><div><span className="eyebrow">BÀN PHÁT / 01</span><h1>Hôm nay, {mode === "audio" ? "nghe" : "xem"} gì?</h1></div><span className="edition-label">YOUTUBE<br /><span>{viaCloudflare ? "CLOUDFLARE API" : viaVps ? "ORACLE VPS API" : viaHome ? "HOME BACKEND" : "EXPERIMENTAL"}</span></span></div>
         <div className="workspace-content">
           <section className="playback-column" aria-label="Trình phát YouTube">
             <form className="link-form" onSubmit={(event) => { event.preventDefault(); void openVideo(); }}>
@@ -238,16 +244,16 @@ export default function Workspace({ initialAuthenticated, configured, viaHome = 
             </div>
             {playbackError && <div className="error-notice playback-error" role="alert"><div><span className="error-title">Luồng bị gián đoạn</span><p>{playbackError}</p></div></div>}
             {source && <section className="now-playing" aria-label="Nội dung đang mở"><span className="eyebrow">{source.mode === "audio" ? "ĐANG NGHE" : "ĐANG MỞ"}</span><h2>{source.title}</h2><div className="video-meta"><span>{source.author}</span><span className="meta-divider" /><span>{formatDuration(source.duration)}</span></div><div className="video-actions"><button className="text-button" onClick={() => void openVideo(source.id, mode, quality, videoRef.current?.currentTime ?? 0)} disabled={loading}><RotateCw size={14} />Lấy lại luồng</button><button className="text-button" onClick={() => void copyLink()}><Copy size={14} />Copy link</button></div></section>}
-            <details className="help-details"><summary>Vì sao có video không phát được?<ChevronDown size={15} /></summary><div><p>YouTube có thể chặn IP datacenter, yêu cầu xác minh hoặc thay đổi player. Bản này không hỗ trợ livestream, video riêng tư, giới hạn tuổi hay DRM.</p><p>Mỗi đoạn media tối đa 4 MiB. Nếu gặp đoạn quá lớn, thử 360p hoặc chỉ nghe. Sau 2 giờ hoặc khi URL hết hạn, bấm “Lấy lại luồng”.</p><p>{viaCloudflare ? "Media đi trực tiếp qua Cloudflare, không qua Vercel. Theo dõi CPU, request và giới hạn gói Workers khi triển khai." : "Vercel tính lưu lượng cả đầu vào và đầu ra, kể cả khi dùng backend nhà. Theo dõi Usage và Firewall trong dashboard khi triển khai."}</p></div></details>
+            <details className="help-details"><summary>Vì sao có video không phát được?<ChevronDown size={15} /></summary><div><p>YouTube có thể chặn IP datacenter, yêu cầu xác minh hoặc thay đổi player. Bản này không hỗ trợ livestream, video riêng tư, giới hạn tuổi hay DRM.</p><p>Mỗi đoạn media tối đa 4 MiB. Nếu gặp đoạn quá lớn, thử 360p hoặc chỉ nghe. Sau 2 giờ hoặc khi URL hết hạn, bấm “Lấy lại luồng”.</p><p>{viaCloudflare ? "Media đi trực tiếp qua Cloudflare, không qua Vercel. Theo dõi CPU, request và giới hạn gói Workers khi triển khai." : viaVps ? "Media đi trực tiếp qua Oracle VPS, không qua Vercel. Theo dõi RAM, băng thông và dung lượng máy chủ." : "Vercel tính lưu lượng cả đầu vào và đầu ra, kể cả khi dùng backend nhà. Theo dõi Usage và Firewall trong dashboard khi triển khai."}</p></div></details>
           </section>
           <aside className="history-panel" ref={historyRef} aria-labelledby="history-heading"><div className="history-heading"><div><span className="eyebrow">TRÊN THIẾT BỊ NÀY</span><h2 id="history-heading">Đã mở gần đây<span>{history.length.toString().padStart(2, "0")}</span></h2></div>{history.length > 0 && <button className="icon-button" aria-label="Xóa lịch sử" onClick={clearHistory}><Trash2 size={16} /></button>}</div>
             {history.length ? <ol className="history-list">{history.map((item, index) => <li key={item.id}><button className={`history-item ${source?.id === item.id ? "history-current" : ""}`} onClick={() => void openVideo(item.id)} disabled={loading} aria-label={`Phát lại ${item.title}`}><div className="history-thumbnail"><PrivateThumbnail api={api} id={item.id} alt="" loading="lazy" onError={(event) => { event.currentTarget.hidden = true; }} /><span className="thumbnail-duration">{formatDuration(item.duration)}</span>{source?.id === item.id && <span className="thumbnail-playing"><AudioLines size={17} /></span>}</div><span className="history-copy"><span className="history-title">{item.title}</span><span className="history-author">{item.author}</span></span><span className="history-index">{String(index + 1).padStart(2, "0")}</span></button></li>)}</ol> : <div className="history-empty"><div className="history-empty-lines" aria-hidden="true"><span /><span /><span /></div><h3>Chưa có video nào.</h3><p>Nội dung đã phát sẽ xuất hiện ở đây.<br />Chỉ bạn, chỉ trên trình duyệt này.</p><button className="text-button sample-button" onClick={() => void openVideo("jNQXAC9IVRw")} disabled={loading}>Thử một video ngắn<ArrowRight size={14} /></button></div>}
-            <div className="connection-note"><span className="eyebrow">ĐƯỜNG TRUYỀN</span><div>Trình duyệt<span>→</span>{viaCloudflare ? <>Cloudflare<span>→</span></> : <>Vercel<span>→</span>{viaHome && <>Máy nhà<span>→</span></>}</>}YouTube</div><p>{viaCloudflare ? "Giao diện trên Vercel. API và media trên Cloudflare." : viaHome ? "Metadata, ảnh và media đều qua máy nhà." : "Không iframe. Media qua server."}<br />Khả năng phát phụ thuộc YouTube.</p>{(viaHome || viaCloudflare) && <button className="text-button backend-check" onClick={() => void checkBackend()} disabled={backendBusy}>{backendBusy ? <LoaderCircle size={14} className="spin" /> : <ShieldCheck size={14} />}Kiểm tra backend {viaCloudflare ? "Cloudflare" : "nhà"}</button>}</div>
+            <div className="connection-note"><span className="eyebrow">ĐƯỜNG TRUYỀN</span><div>Trình duyệt<span>→</span>{viaDirect ? <>{viaCloudflare ? "Cloudflare" : "Oracle VPS"}<span>→</span></> : <>Vercel<span>→</span>{viaHome && <>Máy nhà<span>→</span></>}</>}YouTube</div><p>{viaCloudflare ? "Giao diện trên Vercel. API và media trên Cloudflare." : viaVps ? "Giao diện trên Vercel. API và media trên Oracle VPS." : viaHome ? "Metadata, ảnh và media đều qua máy nhà." : "Không iframe. Media qua server."}<br />Khả năng phát phụ thuộc YouTube.</p>{(viaHome || viaDirect) && <button className="text-button backend-check" onClick={() => void checkBackend()} disabled={backendBusy}>{backendBusy ? <LoaderCircle size={14} className="spin" /> : <ShieldCheck size={14} />}Kiểm tra backend {backendName}</button>}</div>
           </aside>
         </div>
       </main>
     </div>}
-    <footer className="app-footer"><span>relay / personal player</span><span>Dùng nội dung bạn có quyền truy cập, theo chính sách mạng.</span><span>{viaCloudflare ? "VERCEL + CLOUDFLARE" : "VERCEL EDITION — 0.1"}</span></footer>
+    <footer className="app-footer"><span>relay / personal player</span><span>Dùng nội dung bạn có quyền truy cập, theo chính sách mạng.</span><span>{viaCloudflare ? "VERCEL + CLOUDFLARE" : viaVps ? "VERCEL + ORACLE" : "VERCEL EDITION — 0.1"}</span></footer>
     {toast && <div className="toast" role="status"><Check size={16} /><span>{toast}</span><button className="icon-button" onClick={() => setToast("")} aria-label="Đóng thông báo"><X size={15} /></button></div>}
   </div>;
 }

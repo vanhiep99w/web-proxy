@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
 import { AppError } from "@/lib/errors";
 
-// Best-effort per-instance protection, NOT a distributed serverless rate limiter.
-// Configure Vercel Firewall rules as documented in README.md for public deployment.
+// Best-effort per-process protection, NOT a distributed rate limiter.
+// Keep the Node API bound to loopback behind the documented Caddy reverse proxy.
 const buckets = new Map<string, { count: number; reset: number }>();
 
 export function consumeRateLimit(key: string, limit: number, windowMs: number, now = Date.now()) {
@@ -20,8 +20,11 @@ export function consumeRateLimit(key: string, limit: number, windowMs: number, n
 }
 
 export function loginBucket(request: Request) {
-  // Only platform-owned headers are trusted; never an arbitrary X-Forwarded-For.
-  const ip = process.env.RELAY_MODE === "worker" ? request.headers.get("cf-connecting-ip") :
+  // Cloud platforms own their forwarding headers. In server mode the app binds
+  // to loopback, so only the local Caddy proxy can supply X-Forwarded-For.
+  const mode = process.env.RELAY_MODE;
+  const ip = mode === "worker" ? request.headers.get("cf-connecting-ip") :
+    mode === "server" ? request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() :
     process.env.VERCEL ? request.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() : "local";
   return `login:${createHash("sha256").update(ip || "unknown").digest("hex")}`;
 }

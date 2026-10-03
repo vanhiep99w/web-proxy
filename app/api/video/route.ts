@@ -1,9 +1,10 @@
-import { apiSession, playbackOrigin, relayMode } from "@/lib/relay-mode";
+import { apiSession, isDirectBackendMode, playbackOrigin, relayMode } from "@/lib/relay-mode";
 import { forwardHome } from "@/lib/home-proxy";
 import { AppError, errorResponse, privateJson } from "@/lib/errors";
 import { assertSameOrigin, readJson } from "@/lib/http";
-import { assertWorkerOrigin } from "@/lib/worker-cors";
+import { assertDirectOrigin } from "@/lib/worker-cors";
 import { consumeRateLimit } from "@/lib/rate-limit";
+import { serverPreflight, withServerCors } from "@/lib/server-cors";
 import { parseVideoId } from "@/lib/video-id";
 import { resolveVideo } from "@/lib/youtube";
 
@@ -11,10 +12,11 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
-export async function POST(request: Request) {
+async function postVideo(request: Request) {
   try {
-    if (relayMode() === "worker") assertWorkerOrigin(request);
-    else if (relayMode() !== "home") assertSameOrigin(request);
+    const relay = relayMode();
+    if (isDirectBackendMode(relay)) assertDirectOrigin(request);
+    else if (relay !== "home") assertSameOrigin(request);
     const session = apiSession(request);
     consumeRateLimit(`video:${session.sid}`, 15, 60_000);
     const body = await readJson(request);
@@ -23,8 +25,11 @@ export async function POST(request: Request) {
     const quality = body.quality ?? 360;
     if (mode !== "video" && mode !== "audio") throw new AppError("INVALID_MODE", "Chế độ phát không hợp lệ.");
     if (quality !== 360 && quality !== 720) throw new AppError("INVALID_QUALITY", "Chất lượng cần là 360p hoặc 720p.");
-    if (relayMode() === "frontend") return await forwardHome(request, "video", session, { url: id, mode, quality });
+    if (relay === "frontend") return await forwardHome(request, "video", session, { url: id, mode, quality });
     const source = await resolveVideo(id, mode, quality, session, playbackOrigin(request), request.signal);
     return privateJson(source);
   } catch (error) { return errorResponse(error); }
 }
+
+export const POST = (request: Request) => withServerCors(request, () => postVideo(request));
+export const OPTIONS = (request: Request) => serverPreflight(request, ["POST"]);
