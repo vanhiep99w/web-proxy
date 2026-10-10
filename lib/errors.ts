@@ -1,3 +1,5 @@
+import { logEvent } from "@/lib/logging";
+
 export class AppError extends Error {
   constructor(public code: string, message: string, public status = 400) {
     super(message);
@@ -7,6 +9,7 @@ export class AppError extends Error {
 
 export function errorResponse(error: unknown): Response {
   const known = error instanceof AppError;
+  if (known) logEvent("api.error", { code: error.code, status: error.status });
   if (!known) {
     // Never log upstream URLs, tokens, credentials, or the full SDK error object.
     console.error("[relay] Request failed:", error instanceof Error ? error.name : "UnknownError");

@@ -12,11 +12,11 @@
     "dev:home": "node scripts/run-role.mjs home dev",
     "dev:frontend": "node scripts/run-role.mjs frontend dev",
     "dev:vps": "node scripts/run-role.mjs vps dev",
-    "dev:server": "node scripts/run-role.mjs server dev",
+    "dev:server": "npm run build:server && npm run start:server",
     "start:home": "node scripts/run-role.mjs home start",
-    "start:server": "node scripts/run-role.mjs server start",
+    "start:server": "npm --prefix backend start",
     "build": "next build",
-    "build:server": "node scripts/run-role.mjs server build",
+    "build:server": "npm --prefix backend run build",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
@@ -30,7 +30,8 @@
     "dev:worker": "wrangler dev --ip 127.0.0.1 --port 8787",
     "build:worker": "wrangler deploy --dry-run --outdir .wrangler/build",
     "deploy:worker": "wrangler deploy",
-    "test:worker": "vitest run tests/cloudflare-runtime.test.ts"
+    "test:worker": "vitest run tests/cloudflare-runtime.test.ts",
+    "install:server": "npm --prefix backend ci --include=dev"
   },
   "engines": {
     "node": "24.x"

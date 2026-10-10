@@ -4,11 +4,57 @@
 
 **Đây là bản thử nghiệm, không phải cam kết vượt mọi chặn mạng.** Chỉ sử dụng nội dung bạn có quyền truy cập, theo chính sách mạng và điều khoản YouTube / Vercel / Oracle / Cloudflare. Không hỗ trợ Spotify ở bản này.
 
+## Deploy Vercel + Botkeep — backend Node.js thuần
+
+Backend dùng `node:http`, **không chạy Next.js/React và không cần `.next`**. Frontend Vercel vẫn dùng Next.js. Core và handler API dùng chung với các chế độ cũ để giữ auth, CORS, giới hạn request, byte-range và allowlist upstream.
+
+### Botkeep
+
+Giữ nguyên toàn bộ repo khi import (backend cần mã dùng chung trong `lib/`). Chọn Node.js **22.13+ hoặc 24**. Nếu có Project root, chọn `backend` để chỉ cài 13 package thay vì dependencies frontend; **không import riêng thư mục backend**.
+
+- Install tại root repo: `npm --prefix backend ci --include=dev` (không bỏ dev dependencies trước build vì cần esbuild).
+- Startup tại root repo: `npm run build:server && npm run start:server`.
+- Nếu panel hỗ trợ Project root `backend`: install `npm ci --include=dev`, startup `npm run build && npm start`.
+- Nếu không có Project root: có thể dùng install `npm --prefix backend ci --include=dev`, startup `cd backend && npm run build && npm start`.
+- Tắt bước cài dependencies tại root nếu panel cho phép, tránh cài Next.js không cần thiết trên BE.
+
+Runtime tự đọc cổng theo thứ tự `--port`, `SERVER_PORT`, `PORT`, rồi `3001`; mặc định bind `0.0.0.0`. Bấm **Enable HTTPS** trong Domains. Đặt Environment/Secrets trước startup:
+
+```env
+NODE_ENV=production
+RELAY_MODE=server
+API_ORIGIN=https://n6q65c.bot-keep.xyz
+FRONTEND_ORIGINS=https://web-proxy-beta.vercel.app
+ACCESS_PASSWORD=<mật khẩu riêng dài/ngẫu nhiên>
+AUTH_SECRET=<openssl rand -hex 32>
+```
+
+Thay URL bằng domain deployment thật. `API_ORIGIN` là HTTPS origin, không phải địa chỉ bind `0.0.0.0`. Platform ENV được ưu tiên hơn `.env.local`/`.env` ở thư mục backend và root repo. Không commit secrets.
+
+### Vercel
+
+```env
+RELAY_MODE=vps
+NEXT_PUBLIC_API_ORIGIN=https://n6q65c.bot-keep.xyz
+```
+
+Redeploy frontend sau khi đổi URL. Không đặt secrets backend trên Vercel. Mode `vps` là frontend gọi API Node trực tiếp, không phụ thuộc nhà cung cấp hosting.
+
+### Logs
+
+Console xuất JSON gồm `server.ready`, `server.startup_failed`, `request.start`, `request.end`, `api.error` và các bước YouTube: metadata, playability, lọc format, decipher, probe, manifest. Log request có `requestId`, method, path API, HTTP status, error code, thời gian xử lý và trạng thái hoàn thành. Các log phát sinh trong handler có cùng request ID; response trả `X-Request-Id` để đối chiếu Network/Console.
+
+Không log body, mật khẩu, cookie, bearer token, video title, session ID, query/ticket, URL upstream hoặc object lỗi SDK. Lỗi 422 như `UPSTREAM_BLOCKED`/`NO_COMPATIBLE_STREAM` nay xuất hiện trong Console. Log phát video là dữ liệu vận hành riêng tư; giữ thời hạn lưu ngắn và không công khai.
+
+Runtime hủy upstream khi client disconnect/timeout, stream với backpressure, không buffer cả video. Login limiter trên Node runtime dùng bucket chung thay vì tin IP forwarding giả mạo; đây không phải limiter phân tán. Reverse proxy cần thêm rate limit nếu phục vụ nhiều người. Root `/` trên backend trả 404 có chủ đích; test API với Origin và bearer auth.
+
+Kiểm tra điều khoản Botkeep/support cho workload relay video trước khi dùng lâu dài. IP datacenter vẫn có thể bị YouTube chặn.
+
 ## Deploy Vercel + Oracle VPS (khuyến nghị)
 
 ```text
 Browser ── tải giao diện/font ──> Vercel (Next.js)
-Browser ── đăng nhập/API/media ─> Oracle VPS (Caddy → Next.js Node) ─> YouTube
+Browser ── đăng nhập/API/media ─> Oracle VPS (Caddy → Node.js API) ─> YouTube
 ```
 
 API và media đi **trực tiếp** từ browser tới Oracle, không proxy qua Vercel. Vercel không chứa mật khẩu hoặc khóa ký. Backend dùng bearer token chỉ giữ trong bộ nhớ tab, CORS theo origin chính xác và HTTPS do Caddy cấp tự động.
@@ -46,7 +92,7 @@ node --version
 sudo install -d -o ubuntu -g ubuntu /opt/relay-private-player
 git clone https://github.com/vanhiep99w/web-proxy.git /opt/relay-private-player
 cd /opt/relay-private-player
-npm ci
+npm run install:server
 npm run setup:server -- https://api.example.com https://web-proxy-beta.vercel.app
 npm run build:server
 ```
@@ -110,7 +156,7 @@ Kết quả đúng là `204` và `Access-Control-Allow-Origin` khớp domain Ver
 sudo systemctl stop relay-private-api
 cd /opt/relay-private-player
 git pull --ff-only
-npm ci
+npm run install:server
 npm run build:server
 sudo systemctl start relay-private-api
 ```
@@ -200,7 +246,7 @@ Mở `http://127.0.0.1:3000` (localhost cũng được cho phép mặc định).
 | `RELAY_MODE` | Chức năng |
 | --- | --- |
 | `vps` | Next.js/Vercel chỉ UI; browser gọi Oracle/VPS trực tiếp |
-| `server` | API Node.js trên Oracle/VPS, chạy sau Caddy |
+| `server` | API Node.js thuần trên Botkeep/Oracle/VPS |
 | `cloudflare` | Next.js/Vercel chỉ UI; browser gọi Worker trực tiếp |
 | `worker` | API Cloudflare, được cấu hình sẵn trong Wrangler |
 | `standalone` | Next.js UI + API cùng origin (mặc định, chạy local/Vercel) |

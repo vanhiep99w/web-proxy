@@ -1,8 +1,8 @@
-import * as auth from "@/app/api/auth/route";
-import * as video from "@/app/api/video/route";
-import * as stream from "@/app/api/stream/route";
-import * as thumbnail from "@/app/api/thumbnail/route";
-import * as backend from "@/app/api/backend/route";
+import * as auth from "@/backend/routes/auth";
+import * as video from "@/backend/routes/video";
+import * as stream from "@/backend/routes/stream";
+import * as thumbnail from "@/backend/routes/thumbnail";
+import * as backend from "@/backend/routes/backend";
 import { AppError, errorResponse } from "@/lib/errors";
 import { relayMode } from "@/lib/relay-mode";
 import { loginBucket } from "@/lib/rate-limit";

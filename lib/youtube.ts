@@ -1,3 +1,4 @@
+import { logEvent } from "@/lib/logging";
 import { Innertube, Log, Platform, type YT } from "youtubei.js";
 import { evaluatePlayer } from "@/lib/evaluator";
 import { AppError } from "@/lib/errors";
@@ -39,6 +40,7 @@ async function getClient(): Promise<Innertube> {
 }
 
 export async function resolveVideo(id: string, mode: PlaybackMode, quality: VideoQuality, session: Session, origin: string, signal?: AbortSignal): Promise<PlaybackSource> {
+  logEvent("youtube.resolve", { stage: "metadata" });
   let info: YT.VideoInfo;
   let client: Innertube;
   try {
@@ -50,6 +52,8 @@ export async function resolveVideo(id: string, mode: PlaybackMode, quality: Vide
     throw new AppError("YOUTUBE_UNREACHABLE", "Không lấy được thông tin từ YouTube. Kiểm tra kết nối và IP của máy xử lý media.", 502);
   }
   const status = info.playability_status?.status;
+  const safeStatus = ["OK", "LOGIN_REQUIRED", "ERROR", "UNPLAYABLE", "LIVE_STREAM_OFFLINE"].includes(status || "") ? status : "OTHER";
+  logEvent("youtube.playability", { playability: safeStatus, formats: info.streaming_data?.adaptive_formats?.length ?? 0 });
   if (status !== "OK") {
     if (status === "LOGIN_REQUIRED") {
       throw new AppError("UPSTREAM_BLOCKED", "YouTube yêu cầu đăng nhập hoặc xác minh IP. Bản này không nhận cookie tài khoản và không hỗ trợ video hạn chế.", 422);
@@ -76,9 +80,11 @@ export async function resolveVideo(id: string, mode: PlaybackMode, quality: Vide
   for (const format of videoCandidates.sort((a, b) => a.bitrate - b.bitrate)) {
     if (!videoByHeight.has(format.height!)) videoByHeight.set(format.height!, format);
   }
+  logEvent("youtube.formats", { formats: formats.length, audioCandidates: audioCandidates.length, videoCandidates: videoCandidates.length });
   if (!audio || (mode === "video" && !videoByHeight.size)) {
     throw new AppError("NO_COMPATIBLE_STREAM", "YouTube không cung cấp luồng MP4 phù hợp. Thử chế độ chỉ nghe; nếu vẫn lỗi thì backend chưa hỗ trợ video này.", 422);
   }
+  logEvent("youtube.resolve", { stage: "decipher" });
   const selected = [audio, ...videoByHeight.values()];
   const urls = new Map<number, string>();
   let expiresAt = Math.min(session.exp, Math.floor(Date.now() / 1000) + 2 * 60 * 60);
@@ -97,11 +103,13 @@ export async function resolveVideo(id: string, mode: PlaybackMode, quality: Vide
     throw new AppError("STREAM_EXPIRED", "Luồng đã hết hạn. Vui lòng lấy lại luồng.", 410);
   }
   // Verify both audio and the lowest video stream BEFORE telling the browser playback is available.
+  logEvent("youtube.resolve", { stage: "probe" });
   const lowestVideo = [...videoByHeight.values()].sort((a, b) => a.height! - b.height!)[0];
   for (const format of [audio, ...(lowestVideo ? [lowestVideo] : [])]) {
     const probe = await fetchMediaRange(urls.get(format.itag)!, { start: 0, end: 0, length: 1 }, format.content_length!, signal);
     await probe.body?.cancel();
   }
+  logEvent("youtube.resolve", { stage: "manifest" });
   let manifest: string;
   try {
     manifest = await info.toDash({
@@ -124,6 +132,7 @@ export async function resolveVideo(id: string, mode: PlaybackMode, quality: Vide
   } catch {
     throw new AppError("MANIFEST_FAILED", "Không thể tạo bản phát DASH cho video này.", 502);
   }
+  logEvent("youtube.resolve", { stage: "ready" });
   return {
     id, title: info.basic_info.title?.slice(0, 1000) || "Video YouTube",
     author: info.basic_info.author?.slice(0, 500) || info.basic_info.channel?.name?.slice(0, 500) || "YouTube",

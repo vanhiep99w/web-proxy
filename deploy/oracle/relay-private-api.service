@@ -11,7 +11,8 @@ WorkingDirectory=/opt/relay-private-player
 Environment=NODE_ENV=production
 # Leaves memory for Ubuntu, Caddy and QuickJS on the 1 GB Always Free shape.
 Environment="NODE_OPTIONS=--max-old-space-size=640"
-ExecStart=/usr/bin/node scripts/run-role.mjs server start
+Environment=RELAY_BIND_HOST=127.0.0.1
+ExecStart=/usr/bin/node backend/dist/server.mjs
 Restart=on-failure
 RestartSec=5
 TimeoutStopSec=30
