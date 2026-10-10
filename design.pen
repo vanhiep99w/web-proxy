@@ -1,0 +1,604 @@
+{
+  "version": "2.20",
+  "children": [
+    {
+      "type": "frame",
+      "id": "bi8Au",
+      "x": 0,
+      "y": 0,
+      "name": "01 · Mở khóa",
+      "clip": true,
+      "width": 800,
+      "height": 600,
+      "fill": "#171A19",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "ohkaw",
+          "name": "Header",
+          "width": "fill_container",
+          "height": 80,
+          "stroke": "#3C413E",
+          "strokeWidth": {
+            "bottom": 1
+          },
+          "padding": [
+            0,
+            48
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "YBCUS",
+              "name": "Brand",
+              "fill": "#F2F0E9",
+              "content": "relay.",
+              "fontFamily": "Be Vietnam Pro",
+              "fontSize": 29,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "f1Bcw1",
+              "name": "Private",
+              "fill": "#A7AAA4",
+              "content": "TRÌNH PHÁT RIÊNG TƯ",
+              "fontFamily": "Be Vietnam Pro",
+              "fontSize": 11,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "FCZtk",
+          "name": "Login content",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 24,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "zjwNr",
+              "name": "Eyebrow",
+              "fill": "#D2A47B",
+              "content": "RELAY / PRIVATE PLAYER",
+              "fontFamily": "Be Vietnam Pro",
+              "fontSize": 12,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "MFoFM",
+              "name": "Title",
+              "fill": "#F2F0E9",
+              "content": "Vào không gian riêng",
+              "fontFamily": "Be Vietnam Pro",
+              "fontSize": 36,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "tcmiM",
+              "name": "Description",
+              "fill": "#A7AAA4",
+              "content": "Dán link YouTube, xem video hoặc chỉ nghe.",
+              "fontFamily": "Be Vietnam Pro",
+              "fontSize": 15,
+              "fontWeight": "500"
+            },
+            {
+              "type": "frame",
+              "id": "fsBxd",
+              "name": "Password field",
+              "width": 410,
+              "height": 54,
+              "fill": "#242927",
+              "cornerRadius": 6,
+              "stroke": "#3C413E",
+              "strokeWidth": 1,
+              "padding": [
+                0,
+                18
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "MlBzN",
+                  "name": "Placeholder",
+                  "fill": "#A7AAA4",
+                  "content": "Mật khẩu truy cập",
+                  "fontFamily": "Be Vietnam Pro",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "rr3ja",
+              "name": "Unlock button",
+              "width": 410,
+              "height": 52,
+              "fill": "#D2A47B",
+              "cornerRadius": 6,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "PEwMK",
+                  "name": "Unlock label",
+                  "fill": "#1E2520",
+                  "content": "Mở khóa  →",
+                  "fontFamily": "Be Vietnam Pro",
+                  "fontSize": 15,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "I9l0cl",
+              "name": "Security note",
+              "fill": "#A7AAA4",
+              "content": "Phiên riêng tư · Mật khẩu không lưu trên trình duyệt",
+              "fontFamily": "Be Vietnam Pro",
+              "fontSize": 12,
+              "fontWeight": "500"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "p2xaR",
+      "x": 880,
+      "y": 0,
+      "name": "02 · Trình phát",
+      "clip": true,
+      "width": 1440,
+      "height": 900,
+      "fill": "#171A19",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "EMySC",
+          "name": "Header",
+          "width": "fill_container",
+          "height": 80,
+          "stroke": "#3C413E",
+          "strokeWidth": {
+            "bottom": 1
+          },
+          "padding": [
+            0,
+            64
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "Ir9Bv",
+              "name": "Brand",
+              "fill": "#F2F0E9",
+              "content": "relay.",
+              "fontFamily": "Be Vietnam Pro",
+              "fontSize": 29,
+              "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "KL13h",
+              "name": "Lock action",
+              "gap": 9,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "w5FOiM",
+                  "name": "Lock icon",
+                  "width": 17,
+                  "height": 17,
+                  "icon": "lock-keyhole",
+                  "library": "lucide",
+                  "fill": "#A7AAA4"
+                },
+                {
+                  "type": "text",
+                  "id": "ZdMbD",
+                  "name": "Lock label",
+                  "fill": "#A7AAA4",
+                  "content": "Khóa",
+                  "fontFamily": "Be Vietnam Pro",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "U2AsV6",
+          "name": "Main content",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 38,
+          "padding": [
+            52,
+            72
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "Kfh9G",
+              "name": "Page title",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 9,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "wbLy6",
+                  "name": "Kicker",
+                  "fill": "#D2A47B",
+                  "content": "TRÌNH PHÁT CÁ NHÂN",
+                  "fontFamily": "Be Vietnam Pro",
+                  "fontSize": 11,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "oVtGS",
+                  "name": "Heading",
+                  "fill": "#F2F0E9",
+                  "content": "Hôm nay, xem gì?",
+                  "fontFamily": "Be Vietnam Pro",
+                  "fontSize": 35,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "U8qmGX",
+              "name": "Content columns",
+              "width": "fill_container",
+              "gap": 54,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "y8jAg",
+                  "name": "Player area",
+                  "width": 858,
+                  "layout": "vertical",
+                  "gap": 21,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "FUXkG",
+                      "name": "URL form",
+                      "width": "fill_container",
+                      "height": 60,
+                      "fill": "#242927",
+                      "cornerRadius": 6,
+                      "stroke": "#3C413E",
+                      "strokeWidth": 1,
+                      "gap": 14,
+                      "padding": [
+                        5,
+                        5,
+                        5,
+                        18
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "jinUY",
+                          "name": "Link icon",
+                          "width": 18,
+                          "height": 18,
+                          "icon": "link-2",
+                          "library": "lucide",
+                          "fill": "#A7AAA4"
+                        },
+                        {
+                          "type": "text",
+                          "id": "vx3UZ",
+                          "name": "URL placeholder",
+                          "fill": "#A7AAA4",
+                          "content": "Dán link YouTube vào đây…",
+                          "fontFamily": "Be Vietnam Pro",
+                          "fontSize": 15
+                        },
+                        {
+                          "type": "frame",
+                          "id": "G7yBdT",
+                          "name": "Input spacer",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "bT5QE",
+                          "name": "Play button",
+                          "width": 105,
+                          "height": 48,
+                          "fill": "#D2A47B",
+                          "cornerRadius": 5,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "f5NuFb",
+                              "name": "Play label",
+                              "fill": "#1E2520",
+                              "content": "Phát  →",
+                              "fontFamily": "Be Vietnam Pro",
+                              "fontSize": 14,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "eyusp",
+                      "name": "Playback options",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "g0pVX",
+                          "name": "Modes",
+                          "gap": 23,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "L34Oo",
+                              "name": "Video mode",
+                              "fill": "#F2F0E9",
+                              "content": "●  Xem video",
+                              "fontFamily": "Be Vietnam Pro",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "d751sy",
+                              "name": "Audio mode",
+                              "fill": "#A7AAA4",
+                              "content": "○  Chỉ nghe",
+                              "fontFamily": "Be Vietnam Pro",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "WazSi",
+                          "name": "Quality",
+                          "fill": "#A7AAA4",
+                          "content": "Chất lượng   360p  ⌄",
+                          "fontFamily": "Be Vietnam Pro",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "HCW6E",
+                      "name": "Video player",
+                      "width": "fill_container",
+                      "height": 472,
+                      "fill": "#101312",
+                      "cornerRadius": 7,
+                      "stroke": "#3C413E",
+                      "strokeWidth": 1,
+                      "layout": "vertical",
+                      "gap": 15,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "w6ndg",
+                          "name": "Play icon background",
+                          "width": 68,
+                          "height": 68,
+                          "fill": "#242927",
+                          "cornerRadius": 34,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "RaOoI",
+                              "name": "Play icon",
+                              "width": 27,
+                              "height": 27,
+                              "icon": "play",
+                              "library": "lucide",
+                              "fill": "#D2A47B"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "ysVym",
+                          "name": "Empty state title",
+                          "fill": "#F2F0E9",
+                          "content": "Sẵn sàng phát",
+                          "fontFamily": "Be Vietnam Pro",
+                          "fontSize": 19,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "QGw3s",
+                          "name": "Empty state description",
+                          "fill": "#A7AAA4",
+                          "content": "Dán link YouTube để bắt đầu.",
+                          "fontFamily": "Be Vietnam Pro",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "DDZvv",
+                      "name": "Playback status",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "oMfgV",
+                          "name": "Status",
+                          "fill": "#A7AAA4",
+                          "content": "●  Chờ một link",
+                          "fontFamily": "Be Vietnam Pro",
+                          "fontSize": 12,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "text",
+                          "id": "KQb4u",
+                          "name": "Relay status",
+                          "fill": "#A7AAA4",
+                          "content": "YouTube qua server",
+                          "fontFamily": "Be Vietnam Pro",
+                          "fontSize": 12,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "HQWxQ",
+                  "name": "Recent history",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "XcpeZ",
+                      "name": "History heading",
+                      "fill": "#F2F0E9",
+                      "content": "Đã mở gần đây",
+                      "fontFamily": "Be Vietnam Pro",
+                      "fontSize": 19,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "jALGL",
+                      "name": "Divider",
+                      "fill": "#3C413E",
+                      "width": "fill_container",
+                      "height": 1
+                    },
+                    {
+                      "type": "text",
+                      "id": "eEhbt",
+                      "name": "Empty history",
+                      "fill": "#F2F0E9",
+                      "content": "Chưa có video nào.",
+                      "fontFamily": "Be Vietnam Pro",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "fB5bV",
+                      "name": "History description",
+                      "fill": "#A7AAA4",
+                      "textGrowth": "fixed-width",
+                      "width": 260,
+                      "content": "Video đã phát sẽ xuất hiện ở đây, chỉ trên trình duyệt này.",
+                      "fontFamily": "Be Vietnam Pro",
+                      "fontSize": 12
+                    },
+                    {
+                      "type": "text",
+                      "id": "r0MYl",
+                      "name": "Sample action",
+                      "fill": "#D2A47B",
+                      "content": "Thử một video ngắn  →",
+                      "fontFamily": "Be Vietnam Pro",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "V9xPd6",
+                      "name": "Backend status",
+                      "width": "fill_container",
+                      "stroke": "#3C413E",
+                      "strokeWidth": {
+                        "top": 1
+                      },
+                      "layout": "vertical",
+                      "gap": 11,
+                      "padding": [
+                        22,
+                        0,
+                        0,
+                        0
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Q6MLnn",
+                          "name": "Backend heading",
+                          "fill": "#A7AAA4",
+                          "content": "KẾT NỐI",
+                          "fontFamily": "Be Vietnam Pro",
+                          "fontSize": 11,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "A8qL6t",
+                          "name": "Backend detail",
+                          "fill": "#D2A47B",
+                          "content": "Kiểm tra backend  →",
+                          "fontFamily": "Be Vietnam Pro",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "fileToken": "28b01a85-3cea-4c98-9c33-212d966cb705"
+}

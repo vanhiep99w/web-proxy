@@ -207,7 +207,37 @@ Mở `http://127.0.0.1:3000` (localhost cũng được cho phép mặc định).
 | `frontend` | Next.js/Vercel xác thực rồi proxy đến backend nhà; media vẫn qua Vercel |
 | `home` | Backend nhà chỉ nhận khóa riêng từ frontend |
 
-Không chạy Next.js với `RELAY_MODE=worker`; chế độ đó dành cho entrypoint Wrangler. Chạy Oracle bằng `npm run build:server` và `npm run start:server`. Backend nhà cũ vẫn dùng `npm run setup:home`, `npm run dev:home` và `HOME_BACKEND_URL`/`HOME_BACKEND_KEY` theo `.env.example`.
+Không chạy Next.js với `RELAY_MODE=worker`; chế độ đó dành cho entrypoint Wrangler. Chạy Oracle trực tiếp bằng `npm run build:server` và `npm run start:server`. Backend proxy qua Vercel dùng cặp mode `frontend`/`home` và `HOME_BACKEND_KEY` giống nhau ở hai phía.
+
+## Test tạm thời: Client → Vercel → VPS qua HTTP
+
+Chế độ này chỉ để xác nhận luồng khi mạng client chặn VPS. `HOME_BACKEND_KEY`, session context và media đi plaintext từ Vercel tới VPS; không dùng lâu dài.
+
+Trên VPS:
+
+```bash
+cd /opt/relay-private-player
+npm ci
+npm run setup:home
+npm run build
+# Lấy HOME_BACKEND_KEY để đặt cùng giá trị trên Vercel:
+grep '^HOME_BACKEND_KEY=' .env.local
+# Mở TCP 3001 trong firewall rồi chạy:
+RELAY_BIND_HOST=0.0.0.0 npm run start:home
+```
+
+Trên Vercel đặt rồi redeploy:
+
+```env
+RELAY_MODE=frontend
+HOME_BACKEND_URL=http://43.134.15.8:3001
+ALLOW_INSECURE_HOME_BACKEND=true
+HOME_BACKEND_KEY=<giống giá trị trên VPS>
+ACCESS_PASSWORD=<mật khẩu mở website>
+AUTH_SECRET=<openssl rand -hex 32>
+```
+
+Xóa `NEXT_PUBLIC_API_ORIGIN`. Browser chỉ gọi Vercel; Vercel gọi VPS. Bỏ `ALLOW_INSECURE_HOME_BACKEND` và chuyển sang HTTPS trước khi dùng thật.
 
 ## Chạy local standalone
 

@@ -32,4 +32,5 @@ if (existsSync(path)) chmodSync(path, 0o600);
 console.log(updates.length ? `Đã bổ sung ${updates.join(", ")} vào .env.local.` : "Các khóa đã tồn tại; giữ nguyên, không ghi đè.");
 console.log("Không thay đổi mật khẩu / AUTH_SECRET đã có, không đổi RELAY_MODE.");
 console.log("Chạy npm run dev:home (local:3001) hoặc npm run build && npm run start:home.");
+console.log("Test HTTP public tạm thời: RELAY_BIND_HOST=0.0.0.0 npm run start:home; production nên đặt sau HTTPS.");
 console.log("Xem HOME_BACKEND_KEY trong .env.local và đặt cùng giá trị trên Vercel; không chia sẻ / commit khóa.");

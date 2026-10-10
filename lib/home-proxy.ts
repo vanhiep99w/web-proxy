@@ -14,11 +14,13 @@ export function homeBackendUrl(): URL {
   try {
     const url = new URL(process.env.HOME_BACKEND_URL || "");
     const loopback = ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
+    const insecureTest = process.env.RELAY_MODE === "frontend" && process.env.ALLOW_INSECURE_HOME_BACKEND === "true";
+    const allowedHttp = url.protocol === "http:" && ((loopback && !process.env.VERCEL) || insecureTest);
     if (url.username || url.password || url.search || url.hash || url.pathname !== "/" ||
-        (url.protocol !== "https:" && !(url.protocol === "http:" && loopback && !process.env.VERCEL))) throw new Error("Invalid URL");
+        (url.protocol !== "https:" && !allowedHttp)) throw new Error("Invalid URL");
     return url;
   } catch {
-    throw new AppError("HOME_URL_INVALID", "HOME_BACKEND_URL phải là URL HTTPS của máy nhà, không kèm đường dẫn. Local có thể dùng http://127.0.0.1:3001.", 503);
+    throw new AppError("HOME_URL_INVALID", "HOME_BACKEND_URL phải là URL HTTPS không kèm đường dẫn. HTTP từ xa chỉ dành cho test khi ALLOW_INSECURE_HOME_BACKEND=true.", 503);
   }
 }
 

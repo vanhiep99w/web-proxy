@@ -7,12 +7,17 @@ if (!["home", "frontend", "cloudflare", "vps", "server"].includes(mode) || !["de
   process.exit(1);
 }
 const port = mode === "home" || mode === "server" ? "3001" : mode === "frontend" ? "3002" : "3000";
+const hostname = process.env.RELAY_BIND_HOST || "127.0.0.1";
+if (!["127.0.0.1", "0.0.0.0"].includes(hostname) || (hostname === "0.0.0.0" && mode !== "home" && mode !== "server")) {
+  console.error("RELAY_BIND_HOST chỉ nhận 127.0.0.1; backend home/server có thể dùng 0.0.0.0 khi thật sự cần public port.");
+  process.exit(1);
+}
 const env = { ...process.env, RELAY_MODE: mode };
 if (mode === "cloudflare") env.NEXT_PUBLIC_API_ORIGIN = process.env.NEXT_PUBLIC_API_ORIGIN || "http://127.0.0.1:8787";
 if (mode === "vps") env.NEXT_PUBLIC_API_ORIGIN = process.env.NEXT_PUBLIC_API_ORIGIN || "http://127.0.0.1:3001";
 if (command === "dev") env.RELAY_DEV_DIST_DIR = `.next/${mode}-dev`;
 else delete env.RELAY_DEV_DIST_DIR;
-const nextArgs = command === "build" ? ["build", ...args] : [command, "--hostname", "127.0.0.1", "--port", port, ...args];
+const nextArgs = command === "build" ? ["build", ...args] : [command, "--hostname", hostname, "--port", port, ...args];
 const child = spawn(process.execPath, [require.resolve("next/dist/bin/next"), ...nextArgs], { env, stdio: "inherit" });
 for (const signal of ["SIGINT", "SIGTERM"]) process.on(signal, () => child.kill(signal));
 child.on("exit", (code) => process.exit(code ?? 0));

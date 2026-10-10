@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   description: "Trình phát YouTube cá nhân. Luồng media đi qua backend riêng của bạn.",
   robots: { index: false, follow: false },
 };
-export const viewport: Viewport = { themeColor: "#171816", colorScheme: "dark" };
+export const viewport: Viewport = { themeColor: "#171a19", colorScheme: "dark" };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   // Every HTML route, including the not-found page, needs a fresh CSP nonce.
